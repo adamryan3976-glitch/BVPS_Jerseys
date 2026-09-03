@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brooklin Village PS - Athletic Jersey Requests</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="bvps-jersey-ordering.png">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -60,7 +62,7 @@
             <div class="flex items-center justify-between h-20">
                 <!-- Logo & Title -->
                 <div class="flex items-center space-x-3 sm:space-x-4">
-                    <img src="BVPS Jersey Ordering.jpg" alt="Brooklin Village PS Logo" 
+                    <img src="bvps-jersey-ordering.png" alt="Brooklin Village PS Logo" 
                         class="h-14 sm:h-16 w-auto object-contain rounded-lg drop-shadow-md border border-white/10"
                         onerror="this.onerror=null; this.src='https://placehold.co/100x100/1B2430/FFF?text=BVPS';">
                     <div>
@@ -123,7 +125,7 @@
                 <!-- Crest Header Showcase -->
                 <div class="bg-gradient-to-b from-bvps-navy to-bvps-darknavy p-6 sm:p-8 text-white relative text-center border-b-4 border-bvps-red">
                     <div class="relative z-10 flex flex-col items-center">
-                        <img src="BVPS Jersey Ordering.jpg" alt="Brooklin Village PS Crest" 
+                        <img src="bvps-jersey-ordering.png" alt="Brooklin Village PS Crest" 
                             class="h-28 sm:h-36 w-auto object-contain drop-shadow-2xl mb-3 hover:scale-105 transition duration-300"
                             onerror="this.onerror=null; this.src='https://placehold.co/150x150/1B2430/FFF?text=BVPS+Bulldogs';">
                         
@@ -282,6 +284,23 @@
         <!-- VIEW 2: ADMIN DASHBOARD & SHEET -->
         <section id="view-sheet" class="hidden space-y-6">
             
+            <!-- Student Mode Link Helper Card -->
+            <div class="bg-bvps-navy text-white p-4 rounded-2xl border border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-bvps-red text-white flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-link"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-bvps-red">Student Direct Submission Link</p>
+                        <p class="text-xs text-slate-300">Share this exact link with students so they only see the submission form without admin options:</p>
+                    </div>
+                </div>
+                <button onclick="copyStudentLink()" class="w-full sm:w-auto px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl border border-slate-600 transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>Copy Student Link</span>
+                </button>
+            </div>
+
             <!-- Dashboard Stats Cards -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <!-- Card 1: Total Requests -->
@@ -412,7 +431,7 @@
             <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
                 <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
                     <div class="flex items-center gap-3">
-                        <img src="BVPS Jersey Ordering.jpg" alt="BVPS Crest" class="h-10 w-auto object-contain">
+                        <img src="bvps-jersey-ordering.png" alt="BVPS Crest" class="h-10 w-auto object-contain" onerror="this.onerror=null; this.src='https://placehold.co/100x100/1B2430/FFF?text=BVPS';">
                         <div>
                             <h2 class="text-xl font-black text-bvps-navy uppercase tracking-wider">BVPS Jersey Printing Summary</h2>
                             <p class="text-xs text-slate-500">Official size quantities for total vendor jersey order</p>
@@ -465,7 +484,7 @@
     <div id="pin-modal" class="fixed inset-0 bg-bvps-navy/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden p-6 space-y-4">
             <div class="text-center space-y-2">
-                <img src="BVPS Jersey Ordering.jpg" alt="BVPS Crest" class="h-16 w-auto mx-auto object-contain drop-shadow">
+                <img src="bvps-jersey-ordering.png" alt="BVPS Crest" class="h-16 w-auto mx-auto object-contain drop-shadow" onerror="this.onerror=null; this.src='https://placehold.co/100x100/1B2430/FFF?text=BVPS';">
                 <h3 class="font-extrabold text-lg text-bvps-navy uppercase tracking-wider">Admin Verification</h3>
                 <p class="text-xs text-slate-500">Enter the Admin Passcode to view student records.</p>
             </div>
@@ -701,6 +720,20 @@
 
         function saveData() {
             localStorage.setItem('jersey_submissions_data', JSON.stringify(submissions));
+        }
+
+        function copyStudentLink() {
+            const studentUrl = window.location.origin + window.location.pathname + '?mode=student';
+            
+            // Clipboard fallback for iFrames and diverse browsers
+            const tempInput = document.createElement('input');
+            tempInput.value = studentUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast('Student Link copied to clipboard!', 'success');
         }
 
         // Passcode Protection Logic
