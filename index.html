@@ -56,7 +56,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
 
-    <!-- Navigation Header (Hidden in Student Mode) -->
+    <!-- Navigation Header -->
     <header id="main-header" class="bg-bvps-darknavy text-white shadow-lg sticky top-0 z-30 border-b-2 border-bvps-red">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
@@ -104,13 +104,13 @@
         </div>
     </header>
 
-    <!-- Notification Toast Container -->
+    <!-- Toast Notifications -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
     <!-- Main Content Area -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-        <!-- STUDENT ONLY MODE BANNER (When accessed via ?mode=student) -->
+        <!-- STUDENT ONLY MODE BANNER -->
         <div id="student-mode-badge" class="hidden max-w-2xl mx-auto mb-4 bg-bvps-navy text-white border border-bvps-red px-4 py-3 rounded-2xl text-xs flex items-center justify-between shadow-md">
             <span class="flex items-center gap-2 font-bold uppercase tracking-wide">
                 <i class="fa-solid fa-shield-halved text-bvps-red text-base"></i> BVPS Student Request Portal
@@ -174,9 +174,10 @@
                             <label for="student-grade" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
                                 Grade Level <span class="text-bvps-red">*</span>
                             </label>
-                            <select id="student-grade" required
+                            <select id="student-grade" required onchange="handleGradeChange()"
                                 class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-bvps-red focus:border-bvps-red outline-none transition text-sm font-medium bg-slate-50/50 focus:bg-white">
                                 <option value="" disabled selected>Select Grade</option>
+                                <option value="Grade 3">Grade 3 (Primary Div)</option>
                                 <option value="Grade 4">Grade 4 (Junior Div)</option>
                                 <option value="Grade 5">Grade 5 (Junior Div)</option>
                                 <option value="Grade 6">Grade 6 (Junior Div)</option>
@@ -207,7 +208,6 @@
                                 <option value="Youth S">Youth Small (Y-S)</option>
                                 <option value="Youth M">Youth Medium (Y-M)</option>
                                 <option value="Youth L">Youth Large (Y-L)</option>
-                                <option value="Youth XL">Youth Extra Large (Y-XL)</option>
                             </optgroup>
                             <optgroup label="Adult Sizes">
                                 <option value="Adult S">Adult Small (A-S)</option>
@@ -220,27 +220,32 @@
 
                     <hr class="border-slate-200 my-4">
 
-                    <!-- Optional Jersey Number Request Switcher -->
+                    <!-- Jersey Number Request Section -->
                     <div class="space-y-4">
-                        <div class="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <!-- Grade 3 Notice Banner -->
+                        <div id="grade3-number-notice" class="hidden p-3.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl text-xs font-medium flex items-center gap-2.5">
+                            <i class="fa-solid fa-circle-info text-amber-600 text-base flex-shrink-0"></i>
+                            <span>Custom jersey number selection is only available for <strong>Grades 4–8</strong> (Junior & Senior Divisions). Grade 3 Primary students will receive standard team jerseys.</span>
+                        </div>
+
+                        <div id="custom-number-toggle-card" class="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-200 transition">
                             <div>
                                 <span class="text-sm font-extrabold text-slate-800">Request Custom Jersey Number?</span>
-                                <p class="text-xs text-slate-500">Pick up to 3 choices (1 - 99)</p>
+                                <p id="custom-number-subtitle" class="text-xs text-slate-500">Pick up to 3 choices (1 - 99)</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="toggle-number-request" class="sr-only peer" onchange="toggleNumberFields()">
-                                <div class="w-12 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-bvps-red"></div>
+                                <div class="w-12 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-bvps-red peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
                             </label>
                         </div>
 
-                        <!-- Top 3 Number Choices (Hidden by Default) -->
+                        <!-- Top 3 Number Choices -->
                         <div id="number-choices-container" class="hidden space-y-4 p-5 bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-inner">
                             <p class="text-xs font-bold text-bvps-red uppercase tracking-wider flex items-center gap-1.5">
                                 <i class="fa-solid fa-list-ol text-white"></i> Rank Your Top 3 Preferred Jersey Numbers
                             </p>
                             
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <!-- Choice 1 -->
                                 <div>
                                     <label for="choice-1" class="block text-[11px] font-bold text-slate-300 uppercase mb-1">
                                         1st Choice <span class="text-bvps-red">*</span>
@@ -248,7 +253,6 @@
                                     <input type="number" id="choice-1" min="0" max="99" placeholder="e.g. 7"
                                         class="w-full px-3 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-bvps-red focus:border-bvps-red outline-none text-base text-center font-black">
                                 </div>
-                                <!-- Choice 2 -->
                                 <div>
                                     <label for="choice-2" class="block text-[11px] font-bold text-slate-300 uppercase mb-1">
                                         2nd Choice <span class="text-bvps-red">*</span>
@@ -256,7 +260,6 @@
                                     <input type="number" id="choice-2" min="0" max="99" placeholder="e.g. 12"
                                         class="w-full px-3 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white focus:ring-2 focus:ring-bvps-red focus:border-bvps-red outline-none text-base text-center font-black">
                                 </div>
-                                <!-- Choice 3 -->
                                 <div>
                                     <label for="choice-3" class="block text-[11px] font-bold text-slate-300 uppercase mb-1">
                                         3rd Choice <span class="text-bvps-red">*</span>
@@ -303,7 +306,6 @@
 
             <!-- Dashboard Stats Cards -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <!-- Card 1: Total Requests -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Submissions</p>
@@ -314,7 +316,6 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Paid & Assigned -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Paid & Assigned</p>
@@ -325,7 +326,6 @@
                     </div>
                 </div>
 
-                <!-- Card 3: Conflicts / Manual Needed -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-amber-600 uppercase tracking-wider">Manual Review</p>
@@ -336,7 +336,6 @@
                     </div>
                 </div>
 
-                <!-- Card 4: Unpaid Pending -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Unpaid Orders</p>
@@ -350,25 +349,21 @@
 
             <!-- Controls, Search, and Action Bar -->
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-                
-                <!-- Search & Filters -->
                 <div class="flex flex-1 flex-col sm:flex-row gap-2">
-                    <!-- Search Input -->
                     <div class="relative flex-1">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                         <input type="text" id="search-input" oninput="renderTable()" placeholder="Search student or teacher..."
                             class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-bvps-red focus:border-bvps-red outline-none">
                     </div>
 
-                    <!-- Division Filter -->
                     <select id="filter-division" onchange="renderTable()"
                         class="px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-bvps-red outline-none bg-white font-medium">
                         <option value="ALL">All Divisions</option>
+                        <option value="Primary Division">Primary (Grade 3)</option>
                         <option value="Grades 4-6">Junior (Grades 4-6)</option>
                         <option value="Grades 7-8">Senior (Grades 7-8)</option>
                     </select>
 
-                    <!-- Status Filter -->
                     <select id="filter-status" onchange="renderTable()"
                         class="px-3 py-2 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-bvps-red outline-none bg-white font-medium">
                         <option value="ALL">All Statuses</option>
@@ -378,7 +373,6 @@
                     </select>
                 </div>
 
-                <!-- Action Buttons -->
                 <div class="flex items-center gap-2 justify-end">
                     <button onclick="openAddStudentModal()" class="px-3 py-2 bg-bvps-navy hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow">
                         <i class="fa-solid fa-plus text-bvps-red"></i>
@@ -387,10 +381,6 @@
                     <button onclick="exportToCSV()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow">
                         <i class="fa-solid fa-file-csv"></i>
                         <span>Export CSV</span>
-                    </button>
-                    <button onclick="promptChangePin()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition" title="Change Admin PIN">
-                        <i class="fa-solid fa-key"></i>
-                        <span class="hidden sm:inline">Change PIN</span>
                     </button>
                 </div>
             </div>
@@ -413,11 +403,9 @@
                             </tr>
                         </thead>
                         <tbody id="sheet-table-body" class="divide-y divide-slate-200 text-sm font-medium">
-                            <!-- Table Rows dynamically generated -->
                         </tbody>
                     </table>
                 </div>
-                <!-- Empty Table State -->
                 <div id="table-empty-state" class="hidden p-12 text-center text-slate-400 space-y-2">
                     <i class="fa-solid fa-folder-open text-4xl mb-2 text-slate-300"></i>
                     <p class="text-base font-bold text-slate-700">No submissions found</p>
@@ -444,8 +432,20 @@
                 </div>
 
                 <!-- Division Grid Summaries -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Junior Division Breakdown -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Primary Division -->
+                    <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50">
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-200 pb-3">
+                            <span class="font-extrabold text-bvps-navy flex items-center gap-2 text-sm uppercase">
+                                <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                                Primary Division (Grade 3)
+                            </span>
+                            <span id="summary-primary-total" class="text-xs font-black bg-amber-500 text-white px-3 py-1 rounded-full shadow-sm">0 Jerseys</span>
+                        </div>
+                        <div id="summary-primary-list" class="space-y-2 text-xs"></div>
+                    </div>
+
+                    <!-- Junior Division -->
                     <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50">
                         <div class="flex items-center justify-between mb-4 border-b border-slate-200 pb-3">
                             <span class="font-extrabold text-bvps-navy flex items-center gap-2 text-sm uppercase">
@@ -457,7 +457,7 @@
                         <div id="summary-junior-list" class="space-y-2 text-xs"></div>
                     </div>
 
-                    <!-- Senior Division Breakdown -->
+                    <!-- Senior Division -->
                     <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50">
                         <div class="flex items-center justify-between mb-4 border-b border-slate-200 pb-3">
                             <span class="font-extrabold text-bvps-navy flex items-center gap-2 text-sm uppercase">
@@ -473,7 +473,7 @@
                 <!-- Total Grand Summary Cards -->
                 <div class="mt-8 border-t border-slate-200 pt-6">
                     <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Overall Size Totals</h3>
-                    <div id="summary-total-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3"></div>
+                    <div id="summary-total-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3"></div>
                 </div>
             </div>
         </section>
@@ -508,7 +508,7 @@
         </div>
     </div>
 
-    <!-- MODAL: Edit / Manual Override Modal -->
+    <!-- MODAL: Edit Student Record Modal -->
     <div id="edit-modal" class="fixed inset-0 bg-bvps-navy/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden">
             <div class="bg-bvps-navy text-white p-5 flex items-center justify-between border-b-2 border-bvps-red">
@@ -524,7 +524,6 @@
             <form id="edit-form" onsubmit="saveModalEdit(event)" class="p-6 space-y-4">
                 <input type="hidden" id="modal-student-id">
 
-                <!-- Conflict Alert Banner in Modal -->
                 <div id="modal-conflict-banner" class="hidden bg-amber-50 border border-amber-300 text-amber-900 p-3 rounded-2xl text-xs space-y-1">
                     <p class="font-extrabold flex items-center gap-1.5">
                         <i class="fa-solid fa-circle-exclamation text-amber-600"></i> Number Choice Conflict
@@ -541,6 +540,7 @@
                     <div>
                         <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Grade</label>
                         <select id="modal-grade" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-medium outline-none focus:ring-2 focus:ring-bvps-red bg-white">
+                            <option value="Grade 3">Grade 3 (Primary)</option>
                             <option value="Grade 4">Grade 4 (Junior)</option>
                             <option value="Grade 5">Grade 5 (Junior)</option>
                             <option value="Grade 6">Grade 6 (Junior)</option>
@@ -561,7 +561,6 @@
                             <option value="Youth S">Youth S</option>
                             <option value="Youth M">Youth M</option>
                             <option value="Youth L">Youth L</option>
-                            <option value="Youth XL">Youth XL</option>
                             <option value="Adult S">Adult S</option>
                             <option value="Adult M">Adult M</option>
                             <option value="Adult L">Adult L</option>
@@ -624,332 +623,158 @@
     </div>
 
     <script>
-        // Initial Sample Data
-        const SAMPLE_SUBMISSIONS = [
+        // State management
+        let submissions = [
             {
                 id: 'sub-1',
-                name: 'Lucas Miller',
-                grade: 'Grade 5',
-                division: 'Grades 4-6',
-                teacher: 'Mr. Henderson',
-                size: 'Youth M',
+                name: 'Ethan Walker',
+                grade: 'Grade 7',
+                division: 'Grades 7-8',
+                teacher: 'Mr. Davis',
+                size: 'Adult S',
                 wantsNumber: true,
-                choice1: 10,
-                choice2: 7,
-                choice3: 23,
+                choice1: 7,
+                choice2: 10,
+                choice3: 14,
                 paid: true,
-                paidTimestamp: 1710000001000,
-                assignedNumber: 10,
+                paidTimestamp: 1700000000000,
+                assignedNumber: 7,
                 assignmentSource: 'Choice 1',
                 hasConflict: false,
                 manualOverride: null
             },
             {
                 id: 'sub-2',
-                name: 'Emma Watson',
-                grade: 'Grade 4',
-                division: 'Grades 4-6',
-                teacher: 'Mrs. Gable',
-                size: 'Youth S',
-                wantsNumber: true,
-                choice1: 10,
-                choice2: 7,
-                choice3: 14,
-                paid: true,
-                paidTimestamp: 1710000002000,
-                assignedNumber: 7,
-                assignmentSource: 'Choice 2',
-                hasConflict: false,
-                manualOverride: null
-            },
-            {
-                id: 'sub-3',
-                name: 'Sophia Martinez',
+                name: 'Sophia Chen',
                 grade: 'Grade 5',
                 division: 'Grades 4-6',
                 teacher: 'Ms. Vance',
                 size: 'Youth M',
                 wantsNumber: true,
-                choice1: 10,
-                choice2: 7,
-                choice3: 23,
+                choice1: 12,
+                choice2: 8,
+                choice3: 22,
                 paid: true,
-                paidTimestamp: 1710000003000,
+                paidTimestamp: 1700000005000,
+                assignedNumber: 12,
+                assignmentSource: 'Choice 1',
+                hasConflict: false,
+                manualOverride: null
+            },
+            {
+                id: 'sub-3',
+                name: 'Lucas Miller',
+                grade: 'Grade 3',
+                division: 'Primary Division',
+                teacher: 'Mrs. Gable',
+                size: 'Youth S',
+                wantsNumber: false,
+                choice1: null,
+                choice2: null,
+                choice3: null,
+                paid: true,
+                paidTimestamp: 1700000010000,
                 assignedNumber: null,
-                assignmentSource: null,
-                hasConflict: true,
+                assignmentSource: 'Standard Team Jersey',
+                hasConflict: false,
+                manualOverride: null
+            },
+            {
+                id: 'sub-4',
+                name: 'Olivia Jackson',
+                grade: 'Grade 7',
+                division: 'Grades 7-8',
+                teacher: 'Mr. Davis',
+                size: 'Adult M',
+                wantsNumber: true,
+                choice1: 7,
+                choice2: 11,
+                choice3: 99,
+                paid: true,
+                paidTimestamp: 1700000015000,
+                assignedNumber: 11,
+                assignmentSource: 'Choice 2',
+                hasConflict: false,
                 manualOverride: null
             }
         ];
 
-        // Global State
-        let submissions = [];
-        let isAdminAuthenticated = false;
-        let adminPin = '1234'; // Default PIN
-        let pendingTabTarget = null;
+        let adminPin = '1234';
+        let isAdminLoggedIn = false;
+        let pendingAdminTab = null;
 
-        window.onload = function() {
-            // Check for student-only URL parameter (?mode=student)
-            const urlParams = new URLSearchParams(window.location.search);
-            const isStudentMode = urlParams.get('mode') === 'student';
+        const sizeList = ['Youth S', 'Youth M', 'Youth L', 'Adult S', 'Adult M', 'Adult L', 'Adult XL'];
 
-            if (isStudentMode) {
-                document.getElementById('main-header').classList.add('hidden');
-                document.getElementById('student-mode-badge').classList.remove('hidden');
-            }
+        function getDivisionByGrade(grade) {
+            if (grade === 'Grade 3') return 'Primary Division';
+            if (['Grade 4', 'Grade 5', 'Grade 6'].includes(grade)) return 'Grades 4-6';
+            if (['Grade 7', 'Grade 8'].includes(grade)) return 'Grades 7-8';
+            return 'Other';
+        }
 
-            // Load saved PIN
-            const savedPin = localStorage.getItem('jersey_admin_pin');
-            if (savedPin) adminPin = savedPin;
+        function handleGradeChange() {
+            const gradeSelect = document.getElementById('student-grade');
+            const toggle = document.getElementById('toggle-number-request');
+            const notice = document.getElementById('grade3-number-notice');
+            const toggleCard = document.getElementById('custom-number-toggle-card');
+            const subtitle = document.getElementById('custom-number-subtitle');
 
-            // Load saved submissions
-            const savedData = localStorage.getItem('jersey_submissions_data');
-            if (savedData) {
-                try {
-                    submissions = JSON.parse(savedData);
-                } catch(e) {
-                    submissions = [...SAMPLE_SUBMISSIONS];
-                }
+            if (gradeSelect.value === 'Grade 3') {
+                toggle.checked = false;
+                toggle.disabled = true;
+                notice.classList.remove('hidden');
+                toggleCard.classList.add('opacity-60', 'bg-slate-100');
+                subtitle.innerText = 'Not available for Primary Division';
+                toggleNumberFields();
             } else {
-                submissions = [...SAMPLE_SUBMISSIONS];
+                toggle.disabled = false;
+                notice.classList.add('hidden');
+                toggleCard.classList.remove('opacity-60', 'bg-slate-100');
+                subtitle.innerText = 'Pick up to 3 choices (1 - 99)';
             }
-
-            recalculateAssignments();
-            updateAdminUIState();
-        };
-
-        function saveData() {
-            localStorage.setItem('jersey_submissions_data', JSON.stringify(submissions));
-        }
-
-        function copyStudentLink() {
-            const studentUrl = window.location.origin + window.location.pathname + '?mode=student';
-            
-            // Clipboard fallback for iFrames and diverse browsers
-            const tempInput = document.createElement('input');
-            tempInput.value = studentUrl;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            showToast('Student Link copied to clipboard!', 'success');
-        }
-
-        // Passcode Protection Logic
-        function attemptAdminTab(tabName) {
-            if (isAdminAuthenticated) {
-                switchTab(tabName);
-            } else {
-                pendingTabTarget = tabName;
-                document.getElementById('pin-error').classList.add('hidden');
-                document.getElementById('input-pin').value = '';
-                document.getElementById('pin-modal').classList.remove('hidden');
-                setTimeout(() => document.getElementById('input-pin').focus(), 100);
-            }
-        }
-
-        function verifyPin(e) {
-            e.preventDefault();
-            const entered = document.getElementById('input-pin').value;
-            if (entered === adminPin) {
-                isAdminAuthenticated = true;
-                closePinModal();
-                updateAdminUIState();
-                showToast('Admin access granted!', 'success');
-                if (pendingTabTarget) {
-                    switchTab(pendingTabTarget);
-                    pendingTabTarget = null;
-                }
-            } else {
-                document.getElementById('pin-error').classList.remove('hidden');
-            }
-        }
-
-        function closePinModal() {
-            document.getElementById('pin-modal').classList.add('hidden');
-            pendingTabTarget = null;
-        }
-
-        function toggleAdminAuth() {
-            if (isAdminAuthenticated) {
-                isAdminAuthenticated = false;
-                switchTab('form');
-                updateAdminUIState();
-                showToast('Admin session locked.', 'info');
-            } else {
-                attemptAdminTab('sheet');
-            }
-        }
-
-        function updateAdminUIState() {
-            const authBtnText = document.getElementById('admin-auth-text');
-            const authBtnIcon = document.getElementById('admin-auth-icon');
-            const authBtn = document.getElementById('admin-auth-btn');
-            const lockIconSheet = document.getElementById('lock-icon-sheet');
-            const lockIconSummary = document.getElementById('lock-icon-summary');
-
-            if (isAdminAuthenticated) {
-                authBtnText.innerText = 'Admin Unlocked';
-                authBtnIcon.className = 'fa-solid fa-unlock text-emerald-400';
-                authBtn.className = 'px-3 py-2 bg-emerald-950/90 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/50 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition';
-                lockIconSheet.classList.add('hidden');
-                lockIconSummary.classList.add('hidden');
-            } else {
-                authBtnText.innerText = 'Admin Login';
-                authBtnIcon.className = 'fa-solid fa-lock text-amber-400';
-                authBtn.className = 'px-3 py-2 bg-slate-900 hover:bg-slate-800 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition';
-                lockIconSheet.classList.remove('hidden');
-                lockIconSummary.classList.remove('hidden');
-            }
-        }
-
-        function promptChangePin() {
-            const current = prompt("Enter current Admin PIN:");
-            if (current !== adminPin) {
-                alert("Incorrect current PIN.");
-                return;
-            }
-            const newPin = prompt("Enter new PIN (4-10 digits):");
-            if (newPin && newPin.trim().length >= 4) {
-                adminPin = newPin.trim();
-                localStorage.setItem('jersey_admin_pin', adminPin);
-                showToast("Admin PIN updated!", "success");
-            } else if (newPin) {
-                alert("PIN must be at least 4 digits.");
-            }
-        }
-
-        /**
-         * Number Assignment Algorithm
-         */
-        function recalculateAssignments() {
-            const divisions = ['Grades 4-6', 'Grades 7-8'];
-
-            divisions.forEach(div => {
-                const divSubmissions = submissions.filter(s => s.division === div && s.paid);
-                divSubmissions.sort((a, b) => (a.paidTimestamp || 0) - (b.paidTimestamp || 0));
-
-                const assignedNumbers = new Set();
-
-                // Manual Overrides first
-                divSubmissions.forEach(sub => {
-                    if (sub.manualOverride !== null && sub.manualOverride !== undefined) {
-                        assignedNumbers.add(Number(sub.manualOverride));
-                        sub.assignedNumber = Number(sub.manualOverride);
-                        sub.assignmentSource = 'Manual';
-                        sub.hasConflict = false;
-                    }
-                });
-
-                // Auto assignments
-                divSubmissions.forEach(sub => {
-                    if (sub.manualOverride !== null && sub.manualOverride !== undefined) return;
-
-                    if (!sub.wantsNumber || (!sub.choice1 && !sub.choice2 && !sub.choice3)) {
-                        sub.assignedNumber = null;
-                        sub.assignmentSource = 'No Number Requested';
-                        sub.hasConflict = false;
-                        return;
-                    }
-
-                    const choices = [
-                        { choice: sub.choice1, label: 'Choice 1' },
-                        { choice: sub.choice2, label: 'Choice 2' },
-                        { choice: sub.choice3, label: 'Choice 3' }
-                    ].filter(c => c.choice !== null && c.choice !== undefined && c.choice !== '');
-
-                    let assigned = false;
-
-                    for (let c of choices) {
-                        const num = Number(c.choice);
-                        if (!assignedNumbers.has(num)) {
-                            assignedNumbers.add(num);
-                            sub.assignedNumber = num;
-                            sub.assignmentSource = c.label;
-                            sub.hasConflict = false;
-                            assigned = true;
-                            break;
-                        }
-                    }
-
-                    if (!assigned) {
-                        sub.assignedNumber = null;
-                        sub.assignmentSource = null;
-                        sub.hasConflict = true;
-                    }
-                });
-            });
-
-            // Reset unpaid
-            submissions.filter(s => !s.paid).forEach(sub => {
-                if (sub.manualOverride === null || sub.manualOverride === undefined) {
-                    sub.assignedNumber = null;
-                    sub.assignmentSource = null;
-                }
-                sub.hasConflict = false;
-            });
-
-            saveData();
-            updateHeaderBadges();
         }
 
         function toggleNumberFields() {
             const isChecked = document.getElementById('toggle-number-request').checked;
-            const container = document.getElementById('number-choices-container');
-            const choices = [document.getElementById('choice-1'), document.getElementById('choice-2'), document.getElementById('choice-3')];
-            
+            const choicesContainer = document.getElementById('number-choices-container');
+            const choice1 = document.getElementById('choice-1');
+            const choice2 = document.getElementById('choice-2');
+            const choice3 = document.getElementById('choice-3');
+
             if (isChecked) {
-                container.classList.remove('hidden');
-                choices.forEach(c => c.setAttribute('required', 'true'));
+                choicesContainer.classList.remove('hidden');
+                choice1.required = true;
+                choice2.required = true;
+                choice3.required = true;
             } else {
-                container.classList.add('hidden');
-                choices.forEach(c => {
-                    c.removeAttribute('required');
-                    c.value = '';
-                });
+                choicesContainer.classList.add('hidden');
+                choice1.required = false;
+                choice2.required = false;
+                choice3.required = false;
+                choice1.value = '';
+                choice2.value = '';
+                choice3.value = '';
             }
         }
 
-        function getDivisionByGrade(grade) {
-            if (['Grade 4', 'Grade 5', 'Grade 6'].includes(grade)) return 'Grades 4-6';
-            return 'Grades 7-8';
-        }
+        function handleFormSubmit(event) {
+            event.preventDefault();
 
-        function handleFormSubmit(e) {
-            e.preventDefault();
-
-            const name = document.getElementById('student-name').value.trim();
             const grade = document.getElementById('student-grade').value;
-            const teacher = document.getElementById('student-teacher').value.trim();
-            const size = document.getElementById('student-size').value;
-            const wantsNumber = document.getElementById('toggle-number-request').checked;
+            const isGrade3 = (grade === 'Grade 3');
 
-            let c1 = null, c2 = null, c3 = null;
+            const wantsNumber = !isGrade3 && document.getElementById('toggle-number-request').checked;
+            const c1 = wantsNumber ? parseInt(document.getElementById('choice-1').value) : null;
+            const c2 = wantsNumber ? parseInt(document.getElementById('choice-2').value) : null;
+            const c3 = wantsNumber ? parseInt(document.getElementById('choice-3').value) : null;
 
-            if (wantsNumber) {
-                c1 = parseInt(document.getElementById('choice-1').value);
-                c2 = parseInt(document.getElementById('choice-2').value);
-                c3 = parseInt(document.getElementById('choice-3').value);
-
-                if (isNaN(c1) || isNaN(c2) || isNaN(c3)) {
-                    showToast('Please enter all 3 jersey number choices.', 'error');
-                    return;
-                }
-
-                if (c1 === c2 || c1 === c3 || c2 === c3) {
-                    showToast('Your 3 number choices must be unique.', 'error');
-                    return;
-                }
-            }
-
-            const newSub = {
+            const newSubmission = {
                 id: 'sub-' + Date.now(),
-                name: name,
+                name: document.getElementById('student-name').value.trim(),
                 grade: grade,
                 division: getDivisionByGrade(grade),
-                teacher: teacher,
-                size: size,
+                teacher: document.getElementById('student-teacher').value.trim(),
+                size: document.getElementById('student-size').value,
                 wantsNumber: wantsNumber,
                 choice1: c1,
                 choice2: c2,
@@ -962,235 +787,264 @@
                 manualOverride: null
             };
 
-            submissions.push(newSub);
+            submissions.push(newSubmission);
             recalculateAssignments();
 
             document.getElementById('jersey-request-form').reset();
-            document.getElementById('toggle-number-request').checked = false;
+            handleGradeChange();
             toggleNumberFields();
 
             showToast('Jersey request submitted successfully!', 'success');
         }
 
-        function togglePaidStatus(id, isChecked) {
-            const sub = submissions.find(s => s.id === id);
-            if (!sub) return;
+        function recalculateAssignments() {
+            const divisions = ['Grades 4-6', 'Grades 7-8'];
 
-            sub.paid = isChecked;
-            if (isChecked) {
-                sub.paidTimestamp = Date.now();
-                showToast(`Payment recorded for ${sub.name}!`, 'success');
-            } else {
-                sub.paidTimestamp = null;
-                showToast(`Payment unmarked for ${sub.name}.`, 'info');
-            }
+            divisions.forEach(div => {
+                const paidSubs = submissions
+                    .filter(s => s.division === div && s.paid)
+                    .sort((a, b) => (a.paidTimestamp || 0) - (b.paidTimestamp || 0));
 
-            recalculateAssignments();
-            renderTable();
-            renderSummary();
+                const takenNumbers = new Set();
+
+                // Assign manual overrides first
+                paidSubs.forEach(s => {
+                    if (s.manualOverride !== null && s.manualOverride !== undefined) {
+                        s.assignedNumber = s.manualOverride;
+                        s.assignmentSource = 'Manual Override';
+                        s.hasConflict = false;
+                        takenNumbers.add(s.manualOverride);
+                    }
+                });
+
+                // Assign automatic choices
+                paidSubs.forEach(s => {
+                    if (s.manualOverride !== null && s.manualOverride !== undefined) return;
+
+                    if (!s.wantsNumber) {
+                        s.assignedNumber = null;
+                        s.assignmentSource = 'Standard Team Jersey';
+                        s.hasConflict = false;
+                        return;
+                    }
+
+                    if (s.choice1 !== null && !takenNumbers.has(s.choice1)) {
+                        s.assignedNumber = s.choice1;
+                        s.assignmentSource = 'Choice 1';
+                        s.hasConflict = false;
+                        takenNumbers.add(s.choice1);
+                    } else if (s.choice2 !== null && !takenNumbers.has(s.choice2)) {
+                        s.assignedNumber = s.choice2;
+                        s.assignmentSource = 'Choice 2';
+                        s.hasConflict = false;
+                        takenNumbers.add(s.choice2);
+                    } else if (s.choice3 !== null && !takenNumbers.has(s.choice3)) {
+                        s.assignedNumber = s.choice3;
+                        s.assignmentSource = 'Choice 3';
+                        s.hasConflict = false;
+                        takenNumbers.add(s.choice3);
+                    } else {
+                        s.assignedNumber = null;
+                        s.assignmentSource = 'Conflict - No Choice Free';
+                        s.hasConflict = true;
+                    }
+                });
+
+                // Handle unpaid entries
+                submissions.filter(s => s.division === div && !s.paid).forEach(s => {
+                    s.assignedNumber = null;
+                    if (s.manualOverride !== null && s.manualOverride !== undefined) {
+                        s.assignmentSource = 'Pending (Manual Override)';
+                    } else if (s.wantsNumber) {
+                        s.assignmentSource = 'Pending Payment';
+                    } else {
+                        s.assignmentSource = 'Standard Team Jersey';
+                    }
+                    s.hasConflict = false;
+                });
+            });
+
+            // Primary Division (Grade 3) resets
+            submissions.filter(s => s.division === 'Primary Division').forEach(s => {
+                s.assignedNumber = null;
+                s.assignmentSource = 'Standard Team Jersey';
+                s.hasConflict = false;
+            });
         }
 
         function renderTable() {
             const tbody = document.getElementById('sheet-table-body');
             const emptyState = document.getElementById('table-empty-state');
-            
-            const search = document.getElementById('search-input').value.toLowerCase();
+            const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
             const divFilter = document.getElementById('filter-division').value;
             const statusFilter = document.getElementById('filter-status').value;
 
-            const filtered = submissions.filter(sub => {
-                const matchesSearch = sub.name.toLowerCase().includes(search) || sub.teacher.toLowerCase().includes(search);
-                const matchesDiv = divFilter === 'ALL' || sub.division === divFilter;
+            tbody.innerHTML = '';
+
+            let filtered = submissions.filter(s => {
+                const matchesSearch = s.name.toLowerCase().includes(searchVal) || s.teacher.toLowerCase().includes(searchVal);
+                const matchesDiv = (divFilter === 'ALL') || (s.division === divFilter);
                 
                 let matchesStatus = true;
-                if (statusFilter === 'PAID') matchesStatus = sub.paid;
-                else if (statusFilter === 'UNPAID') matchesStatus = !sub.paid;
-                else if (statusFilter === 'CONFLICT') matchesStatus = sub.hasConflict;
+                if (statusFilter === 'PAID') matchesStatus = s.paid;
+                if (statusFilter === 'UNPAID') matchesStatus = !s.paid;
+                if (statusFilter === 'CONFLICT') matchesStatus = s.hasConflict;
 
                 return matchesSearch && matchesDiv && matchesStatus;
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = '';
                 emptyState.classList.remove('hidden');
-                updateStats();
-                return;
             } else {
                 emptyState.classList.add('hidden');
             }
 
-            let html = '';
+            filtered.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
 
-            filtered.forEach(sub => {
-                let rowBgClass = 'hover:bg-slate-50';
-                if (sub.hasConflict) {
-                    rowBgClass = 'bg-amber-50/90 hover:bg-amber-100/80 border-l-4 border-l-amber-500';
-                } else if (sub.paid) {
-                    rowBgClass = 'bg-emerald-50/30 hover:bg-emerald-50/70';
+                let choicesText = '<span class="text-slate-400 italic">None</span>';
+                if (s.wantsNumber && (s.choice1 !== null || s.choice2 !== null || s.choice3 !== null)) {
+                    choicesText = `<div class="flex items-center gap-1 font-mono text-xs">
+                        <span class="px-1.5 py-0.5 bg-slate-100 rounded text-slate-800 font-black">${s.choice1 || '-'}</span>
+                        <span class="px-1.5 py-0.5 bg-slate-100 rounded text-slate-800 font-black">${s.choice2 || '-'}</span>
+                        <span class="px-1.5 py-0.5 bg-slate-100 rounded text-slate-800 font-black">${s.choice3 || '-'}</span>
+                    </div>`;
                 }
 
-                let choicesHtml = '<span class="text-slate-400 italic text-xs">None</span>';
-                if (sub.wantsNumber && (sub.choice1 || sub.choice2 || sub.choice3)) {
-                    choicesHtml = `
-                        <div class="flex items-center space-x-1 text-xs font-bold">
-                            <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-800" title="1st Choice">#${sub.choice1}</span>
-                            <span class="text-slate-400">/</span>
-                            <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-800" title="2nd Choice">#${sub.choice2}</span>
-                            <span class="text-slate-400">/</span>
-                            <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-800" title="3rd Choice">#${sub.choice3}</span>
+                let statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold"><i class="fa-solid fa-clock"></i> Unpaid</span>';
+                if (s.paid) {
+                    if (s.hasConflict) {
+                        statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold"><i class="fa-solid fa-triangle-exclamation"></i> Conflict</span>';
+                    } else {
+                        statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold"><i class="fa-solid fa-check-circle"></i> Paid & Assigned</span>';
+                    }
+                }
+
+                let numberDisplay = '<span class="text-slate-400 font-mono">-</span>';
+                if (s.assignedNumber !== null) {
+                    numberDisplay = `<span class="inline-block px-3 py-1 bg-bvps-navy text-white font-mono font-black text-sm rounded-xl shadow-sm">#${s.assignedNumber}</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center">
+                        <input type="checkbox" ${s.paid ? 'checked' : ''} onchange="togglePaidStatus('${s.id}')"
+                            class="w-4 h-4 text-bvps-red rounded focus:ring-bvps-red cursor-pointer">
+                    </td>
+                    <td class="py-3 px-4 font-bold text-slate-900">${escapeHtml(s.name)}</td>
+                    <td class="py-3 px-4 text-xs font-medium text-slate-600">
+                        <span class="font-bold text-slate-800">${escapeHtml(s.grade)}</span> 
+                        <span class="text-[10px] block text-slate-400 uppercase">${escapeHtml(s.division)}</span>
+                    </td>
+                    <td class="py-3 px-4 text-xs font-medium text-slate-700">${escapeHtml(s.teacher)}</td>
+                    <td class="py-3 px-4 font-bold text-xs text-bvps-navy">${escapeHtml(s.size)}</td>
+                    <td class="py-3 px-4">${choicesText}</td>
+                    <td class="py-3 px-4">
+                        ${numberDisplay}
+                        <span class="block text-[10px] text-slate-400 mt-0.5">${escapeHtml(s.assignmentSource || '')}</span>
+                    </td>
+                    <td class="py-3 px-4">${statusBadge}</td>
+                    <td class="py-3 px-4 text-right">
+                        <div class="flex items-center justify-end space-x-1">
+                            <button onclick="openEditModal('${s.id}')" class="p-2 text-slate-500 hover:text-bvps-navy hover:bg-slate-100 rounded-xl transition" title="Edit Record">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteSubmission('${s.id}')" class="p-2 text-slate-400 hover:text-bvps-red hover:bg-red-50 rounded-xl transition" title="Delete Record">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </div>
-                    `;
-                }
-
-                let assignedHtml = '';
-                if (sub.hasConflict) {
-                    assignedHtml = `
-                        <span class="inline-flex items-center gap-1 text-xs font-black text-amber-800 bg-amber-200/80 border border-amber-300 px-2.5 py-1 rounded-full animate-pulse">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                            All Choices Taken
-                        </span>
-                    `;
-                } else if (sub.assignedNumber !== null && sub.assignedNumber !== undefined) {
-                    assignedHtml = `
-                        <div class="flex items-center space-x-1.5">
-                            <span class="text-base font-black text-bvps-red bg-rose-50 border border-bvps-red/30 px-2.5 py-0.5 rounded-lg shadow-sm">
-                                #${sub.assignedNumber}
-                            </span>
-                            <span class="text-[11px] font-semibold text-slate-500">
-                                (${sub.assignmentSource})
-                            </span>
-                        </div>
-                    `;
-                } else if (sub.paid && !sub.wantsNumber) {
-                    assignedHtml = `<span class="text-xs text-slate-500 italic">No # Requested</span>`;
-                } else {
-                    assignedHtml = `<span class="text-xs text-slate-400 italic">Pending Payment</span>`;
-                }
-
-                let statusBadge = '';
-                if (sub.hasConflict) {
-                    statusBadge = `
-                        <button onclick="openEditModal('${sub.id}')" class="text-left">
-                            <span class="inline-block bg-amber-500 text-slate-900 text-[11px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider hover:bg-amber-600 transition shadow-sm">
-                                ⚠️ Needs Manual Assignment
-                            </span>
-                        </button>
-                    `;
-                } else if (sub.paid) {
-                    statusBadge = `
-                        <span class="inline-block bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-extrabold px-2 py-0.5 rounded-md">
-                            Paid & Confirmed
-                        </span>
-                    `;
-                } else {
-                    statusBadge = `
-                        <span class="inline-block bg-slate-100 text-slate-600 border border-slate-300 text-[11px] font-medium px-2 py-0.5 rounded-md">
-                            Unpaid
-                        </span>
-                    `;
-                }
-
-                html += `
-                    <tr class="transition ${rowBgClass}">
-                        <td class="py-3 px-4 text-center">
-                            <input type="checkbox" ${sub.paid ? 'checked' : ''} onchange="togglePaidStatus('${sub.id}', this.checked)"
-                                class="w-5 h-5 text-bvps-red rounded border-slate-300 focus:ring-bvps-red cursor-pointer accent-bvps-red">
-                        </td>
-                        <td class="py-3 px-4 font-bold text-slate-900">${escapeHtml(sub.name)}</td>
-                        <td class="py-3 px-4 text-xs">
-                            <span class="font-extrabold text-slate-800">${sub.grade}</span>
-                            <span class="block text-[10px] text-slate-400 font-bold uppercase">${sub.division}</span>
-                        </td>
-                        <td class="py-3 px-4 text-xs font-semibold text-slate-600">${escapeHtml(sub.teacher)}</td>
-                        <td class="py-3 px-4">
-                            <span class="inline-block text-xs font-extrabold bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md border border-slate-200">${sub.size}</span>
-                        </td>
-                        <td class="py-3 px-4">${choicesHtml}</td>
-                        <td class="py-3 px-4">${assignedHtml}</td>
-                        <td class="py-3 px-4">${statusBadge}</td>
-                        <td class="py-3 px-4 text-right space-x-1">
-                            <button onclick="openEditModal('${sub.id}')" title="Edit Record" class="p-1.5 text-slate-500 hover:text-bvps-red rounded-lg transition"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteSubmission('${sub.id}')" title="Delete Submission" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition"><i class="fa-solid fa-trash-can"></i></button>
-                        </td>
-                    </tr>
+                    </td>
                 `;
+                tbody.appendChild(tr);
             });
 
-            tbody.innerHTML = html;
             updateStats();
         }
 
-        function updateStats() {
-            const total = submissions.length;
-            const paid = submissions.filter(s => s.paid && !s.hasConflict).length;
-            const conflicts = submissions.filter(s => s.hasConflict).length;
-            const unpaid = submissions.filter(s => !s.paid).length;
+        function togglePaidStatus(id) {
+            const sub = submissions.find(s => s.id === id);
+            if (!sub) return;
 
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-paid').innerText = paid;
-            document.getElementById('stat-conflicts').innerText = conflicts;
-            document.getElementById('stat-unpaid').innerText = unpaid;
+            sub.paid = !sub.paid;
+            if (sub.paid) sub.paidTimestamp = Date.now();
+            else sub.paidTimestamp = null;
+
+            recalculateAssignments();
+            renderTable();
+            renderSummary();
+            showToast(`Updated payment status for ${sub.name}`, 'info');
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = submissions.length;
+            document.getElementById('stat-paid').innerText = submissions.filter(s => s.paid && !s.hasConflict).length;
+            
+            const conflictsCount = submissions.filter(s => s.hasConflict).length;
+            document.getElementById('stat-conflicts').innerText = conflictsCount;
+            document.getElementById('stat-unpaid').innerText = submissions.filter(s => !s.paid).length;
 
             const badge = document.getElementById('badge-conflict-count');
-            if (conflicts > 0) {
-                badge.innerText = conflicts;
+            if (conflictsCount > 0) {
+                badge.innerText = conflictsCount;
                 badge.classList.remove('hidden');
             } else {
                 badge.classList.add('hidden');
             }
         }
 
-        function updateHeaderBadges() {
-            updateStats();
-        }
-
         function renderSummary() {
+            const primaryList = document.getElementById('summary-primary-list');
             const juniorList = document.getElementById('summary-junior-list');
             const seniorList = document.getElementById('summary-senior-list');
             const totalGrid = document.getElementById('summary-total-grid');
 
-            const sizes = ['Youth S', 'Youth M', 'Youth L', 'Youth XL', 'Adult S', 'Adult M', 'Adult L', 'Adult XL'];
+            primaryList.innerHTML = '';
+            juniorList.innerHTML = '';
+            seniorList.innerHTML = '';
+            totalGrid.innerHTML = '';
 
-            const juniorCounts = {}, seniorCounts = {}, totalCounts = {};
-            sizes.forEach(s => { juniorCounts[s] = 0; seniorCounts[s] = 0; totalCounts[s] = 0; });
+            const primarySubs = submissions.filter(s => s.division === 'Primary Division');
+            const juniorSubs = submissions.filter(s => s.division === 'Grades 4-6');
+            const seniorSubs = submissions.filter(s => s.division === 'Grades 7-8');
 
-            let juniorTotal = 0, seniorTotal = 0;
+            document.getElementById('summary-primary-total').innerText = `${primarySubs.length} Jerseys`;
+            document.getElementById('summary-junior-total').innerText = `${juniorSubs.length} Jerseys`;
+            document.getElementById('summary-senior-total').innerText = `${seniorSubs.length} Jerseys`;
 
-            submissions.forEach(sub => {
-                if (totalCounts[sub.size] !== undefined) totalCounts[sub.size]++;
-                if (sub.division === 'Grades 4-6') {
-                    if (juniorCounts[sub.size] !== undefined) juniorCounts[sub.size]++;
-                    juniorTotal++;
-                } else {
-                    if (seniorCounts[sub.size] !== undefined) seniorCounts[sub.size]++;
-                    seniorTotal++;
-                }
+            sizeList.forEach(sz => {
+                const pCount = primarySubs.filter(s => s.size === sz).length;
+                const jCount = juniorSubs.filter(s => s.size === sz).length;
+                const sCount = seniorSubs.filter(s => s.size === sz).length;
+                const totalCount = pCount + jCount + sCount;
+
+                // Primary row
+                primaryList.innerHTML += `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200">
+                        <span class="font-bold text-slate-700">${sz}</span>
+                        <span class="font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg">${pCount}</span>
+                    </div>`;
+
+                // Junior row
+                juniorList.innerHTML += `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200">
+                        <span class="font-bold text-slate-700">${sz}</span>
+                        <span class="font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg">${jCount}</span>
+                    </div>`;
+
+                // Senior row
+                seniorList.innerHTML += `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200">
+                        <span class="font-bold text-slate-700">${sz}</span>
+                        <span class="font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg">${sCount}</span>
+                    </div>`;
+
+                // Grand total card
+                totalGrid.innerHTML += `
+                    <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center">
+                        <p class="text-xs font-bold text-slate-500 uppercase">${sz}</p>
+                        <p class="text-xl font-black text-bvps-navy mt-1">${totalCount}</p>
+                    </div>`;
             });
-
-            document.getElementById('summary-junior-total').innerText = `${juniorTotal} Jerseys`;
-            document.getElementById('summary-senior-total').innerText = `${seniorTotal} Jerseys`;
-
-            let jHtml = '';
-            sizes.forEach(s => {
-                if (juniorCounts[s] > 0) {
-                    jHtml += `<div class="flex items-center justify-between py-1 border-b border-slate-200"><span class="font-bold text-slate-700">${s}</span><span class="font-black bg-slate-200 px-2 py-0.5 rounded text-slate-800">${juniorCounts[s]}</span></div>`;
-                }
-            });
-            juniorList.innerHTML = jHtml || '<p class="text-slate-400 italic">No orders yet</p>';
-
-            let sHtml = '';
-            sizes.forEach(s => {
-                if (seniorCounts[s] > 0) {
-                    sHtml += `<div class="flex items-center justify-between py-1 border-b border-slate-200"><span class="font-bold text-slate-700">${s}</span><span class="font-black bg-slate-200 px-2 py-0.5 rounded text-slate-800">${seniorCounts[s]}</span></div>`;
-                }
-            });
-            seniorList.innerHTML = sHtml || '<p class="text-slate-400 italic">No orders yet</p>';
-
-            let gHtml = '';
-            sizes.forEach(s => {
-                gHtml += `<div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center"><p class="text-[10px] font-bold text-slate-400 uppercase">${s}</p><p class="text-xl font-black text-bvps-navy mt-0.5">${totalCounts[s]}</p></div>`;
-            });
-            totalGrid.innerHTML = gHtml;
         }
 
         function openEditModal(id) {
@@ -1250,7 +1104,7 @@
             sub.choice1 = !isNaN(c1) ? c1 : null;
             sub.choice2 = !isNaN(c2) ? c2 : null;
             sub.choice3 = !isNaN(c3) ? c3 : null;
-            sub.wantsNumber = sub.choice1 !== null || sub.choice2 !== null || sub.choice3 !== null;
+            sub.wantsNumber = (sub.grade !== 'Grade 3') && (sub.choice1 !== null || sub.choice2 !== null || sub.choice3 !== null);
 
             const overrideVal = document.getElementById('modal-assigned-override').value.trim();
             sub.manualOverride = overrideVal !== '' ? parseInt(overrideVal) : null;
@@ -1291,13 +1145,11 @@
             const sub = submissions.find(s => s.id === id);
             if (!sub) return;
 
-            if (confirm(`Are you sure you want to delete ${sub.name}'s request?`)) {
-                submissions = submissions.filter(s => s.id !== id);
-                recalculateAssignments();
-                renderTable();
-                renderSummary();
-                showToast('Submission deleted.', 'info');
-            }
+            submissions = submissions.filter(s => s.id !== id);
+            recalculateAssignments();
+            renderTable();
+            renderSummary();
+            showToast(`Deleted request for ${sub.name}`, 'info');
         }
 
         function exportToCSV() {
@@ -1360,6 +1212,67 @@
             }
         }
 
+        function attemptAdminTab(tabName) {
+            if (isAdminLoggedIn) {
+                switchTab(tabName);
+            } else {
+                pendingAdminTab = tabName;
+                document.getElementById('input-pin').value = '';
+                document.getElementById('pin-error').classList.add('hidden');
+                document.getElementById('pin-modal').classList.remove('hidden');
+            }
+        }
+
+        function verifyPin(e) {
+            e.preventDefault();
+            const input = document.getElementById('input-pin').value;
+            if (input === adminPin) {
+                isAdminLoggedIn = true;
+                document.getElementById('pin-modal').classList.add('hidden');
+                document.getElementById('lock-icon-sheet').classList.replace('fa-lock', 'fa-lock-open');
+                document.getElementById('lock-icon-summary').classList.replace('fa-lock', 'fa-lock-open');
+                document.getElementById('admin-auth-icon').classList.replace('fa-lock', 'fa-right-from-bracket');
+                document.getElementById('admin-auth-text').innerText = 'Logout';
+                showToast('Admin session unlocked!', 'success');
+                if (pendingAdminTab) {
+                    switchTab(pendingAdminTab);
+                    pendingAdminTab = null;
+                }
+            } else {
+                document.getElementById('pin-error').classList.remove('hidden');
+            }
+        }
+
+        function closePinModal() {
+            document.getElementById('pin-modal').classList.add('hidden');
+            pendingAdminTab = null;
+        }
+
+        function toggleAdminAuth() {
+            if (isAdminLoggedIn) {
+                isAdminLoggedIn = false;
+                document.getElementById('lock-icon-sheet').classList.replace('fa-lock-open', 'fa-lock');
+                document.getElementById('lock-icon-summary').classList.replace('fa-lock-open', 'fa-lock');
+                document.getElementById('admin-auth-icon').classList.replace('fa-right-from-bracket', 'fa-lock');
+                document.getElementById('admin-auth-text').innerText = 'Admin Login';
+                switchTab('form');
+                showToast('Admin logged out.', 'info');
+            } else {
+                attemptAdminTab('sheet');
+            }
+        }
+
+        function copyStudentLink() {
+            const url = window.location.href.split('?')[0] + '?mode=student';
+            const tempInput = document.createElement('input');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast('Student Link copied to clipboard!', 'success');
+        }
+
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1402,6 +1315,22 @@
                 }[m];
             });
         }
+
+        // Initialize on load
+        window.onload = function() {
+            recalculateAssignments();
+            handleGradeChange();
+            
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('mode') === 'student') {
+                document.getElementById('student-mode-badge').classList.remove('hidden');
+                document.getElementById('admin-auth-btn').classList.add('hidden');
+                document.getElementById('nav-sheet-btn').classList.add('hidden');
+                document.getElementById('nav-summary-btn').classList.add('hidden');
+            }
+            
+            switchTab('form');
+        };
     </script>
 </body>
 </html>
