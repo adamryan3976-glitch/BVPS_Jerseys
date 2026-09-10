@@ -52,6 +52,11 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        body.student-mode #nav-sheet-btn,
+        body.student-mode #nav-summary-btn,
+        body.student-mode #admin-auth-btn {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
@@ -1190,29 +1195,44 @@
         }
 
         function switchTab(tabName) {
+            if (document.body.classList.contains('student-mode') && tabName !== 'form') {
+                return;
+            }
+
             document.getElementById('view-form').classList.add('hidden');
             document.getElementById('view-sheet').classList.add('hidden');
             document.getElementById('view-summary').classList.add('hidden');
 
+            const isStudent = document.body.classList.contains('student-mode');
+
             document.getElementById('nav-form-btn').className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-800";
-            document.getElementById('nav-sheet-btn').className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-800";
-            document.getElementById('nav-summary-btn').className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-800";
+            
+            const sheetBtn = document.getElementById('nav-sheet-btn');
+            if (sheetBtn) {
+                sheetBtn.className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-800" + (isStudent ? " hidden" : "");
+            }
+            
+            const summaryBtn = document.getElementById('nav-summary-btn');
+            if (summaryBtn) {
+                summaryBtn.className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 text-slate-300 hover:text-white hover:bg-slate-800" + (isStudent ? " hidden" : "");
+            }
 
             if (tabName === 'form') {
                 document.getElementById('view-form').classList.remove('hidden');
                 document.getElementById('nav-form-btn').className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 bg-bvps-red text-white shadow-md";
-            } else if (tabName === 'sheet') {
+            } else if (tabName === 'sheet' && !isStudent) {
                 document.getElementById('view-sheet').classList.remove('hidden');
-                document.getElementById('nav-sheet-btn').className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 bg-bvps-red text-white shadow-md";
+                if (sheetBtn) sheetBtn.className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 bg-bvps-red text-white shadow-md";
                 renderTable();
-            } else if (tabName === 'summary') {
+            } else if (tabName === 'summary' && !isStudent) {
                 document.getElementById('view-summary').classList.remove('hidden');
-                document.getElementById('nav-summary-btn').className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 bg-bvps-red text-white shadow-md";
+                if (summaryBtn) summaryBtn.className = "px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center space-x-2 bg-bvps-red text-white shadow-md";
                 renderSummary();
             }
         }
 
         function attemptAdminTab(tabName) {
+            if (document.body.classList.contains('student-mode')) return;
             if (isAdminLoggedIn) {
                 switchTab(tabName);
             } else {
@@ -1316,18 +1336,25 @@
             });
         }
 
+        function checkStudentMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = (urlParams.get('mode') || '').toLowerCase();
+            const isStudent = mode === 'student' || window.location.href.toLowerCase().includes('mode=student');
+            
+            if (isStudent) {
+                document.body.classList.add('student-mode');
+                const badge = document.getElementById('student-mode-badge');
+                if (badge) badge.classList.remove('hidden');
+            }
+            return isStudent;
+        }
+
         // Initialize on load
         window.onload = function() {
             recalculateAssignments();
             handleGradeChange();
             
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('mode') === 'student') {
-                document.getElementById('student-mode-badge').classList.remove('hidden');
-                document.getElementById('admin-auth-btn').classList.add('hidden');
-                document.getElementById('nav-sheet-btn').classList.add('hidden');
-                document.getElementById('nav-summary-btn').classList.add('hidden');
-            }
+            checkStudentMode();
             
             switchTab('form');
         };
