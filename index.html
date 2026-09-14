@@ -635,7 +635,14 @@
 
         // Global Application & Storage Setup
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'bvps-jersey-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUDdhFuucW0N2dWX3IXNh4Uwu5zK6rHAc",
+            authDomain: "bvps-jersey-tracker.firebaseapp.com",
+            projectId: "bvps-jersey-tracker",
+            storageBucket: "bvps-jersey-tracker.firebasestorage.app",
+            messagingSenderId: "404784690878",
+            appId: "1:404784690878:web:15a5964eea5c5352eb10ef"
+        };
 
         let db = null;
         let auth = null;
