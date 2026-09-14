@@ -627,9 +627,22 @@
         </div>
     </div>
 
-    <script>
-        // State management
-        let submissions = [
+    <!-- Firebase SDK Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Application & Storage Setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'bvps-jersey-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+
+        // Initial default seed submissions
+        let defaultSubmissions = [
             {
                 id: 'sub-1',
                 name: 'Ethan Walker',
@@ -704,11 +717,107 @@
             }
         ];
 
+        let submissions = [...defaultSubmissions];
         let adminPin = '1234';
         let isAdminLoggedIn = false;
         let pendingAdminTab = null;
 
         const sizeList = ['Youth S', 'Youth M', 'Youth L', 'Adult S', 'Adult M', 'Adult L', 'Adult XL'];
+
+        // Persistent Sync Helpers
+        function saveLocalFallback() {
+            try {
+                localStorage.setItem('bvps_jersey_data', JSON.stringify(submissions));
+            } catch(e) {}
+        }
+
+        function loadLocalFallback() {
+            try {
+                const stored = localStorage.getItem('bvps_jersey_data');
+                if (stored) {
+                    submissions = JSON.parse(stored);
+                }
+            } catch(e) {}
+        }
+
+        async function syncRecordToFirestore(record) {
+            saveLocalFallback();
+            if (db && currentUser) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'jersey_requests', record.id);
+                    await setDoc(docRef, record, { merge: true });
+                } catch (err) {
+                    console.error("Firestore write error:", err);
+                }
+            }
+        }
+
+        async function deleteRecordFromFirestore(id) {
+            saveLocalFallback();
+            if (db && currentUser) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'jersey_requests', id);
+                    await deleteDoc(docRef);
+                } catch (err) {
+                    console.error("Firestore delete error:", err);
+                }
+            }
+        }
+
+        async function initStorage() {
+            loadLocalFallback();
+
+            if (!firebaseConfig) {
+                recalculateAssignments();
+                renderTable();
+                renderSummary();
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = cred.user;
+                } else {
+                    const cred = await signInAnonymously(auth);
+                    currentUser = cred.user;
+                }
+
+                if (!currentUser) return;
+
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'jersey_requests');
+                onSnapshot(colRef, (snapshot) => {
+                    const remoteData = [];
+                    snapshot.forEach(docSnap => {
+                        remoteData.push(docSnap.data());
+                    });
+
+                    if (remoteData.length > 0) {
+                        submissions = remoteData;
+                        saveLocalFallback();
+                    } else if (submissions.length > 0) {
+                        // Seed initial records to Firestore if collection is brand new
+                        submissions.forEach(sub => syncRecordToFirestore(sub));
+                    }
+
+                    recalculateAssignments();
+                    renderTable();
+                    renderSummary();
+                }, (err) => {
+                    console.error("Firestore snapshot listener error:", err);
+                });
+
+            } catch (e) {
+                console.error("Firebase init failed, running in local persistence mode:", e);
+                recalculateAssignments();
+                renderTable();
+                renderSummary();
+            }
+        }
 
         function getDivisionByGrade(grade) {
             if (grade === 'Grade 3') return 'Primary Division';
@@ -723,6 +832,8 @@
             const notice = document.getElementById('grade3-number-notice');
             const toggleCard = document.getElementById('custom-number-toggle-card');
             const subtitle = document.getElementById('custom-number-subtitle');
+
+            if (!gradeSelect) return;
 
             if (gradeSelect.value === 'Grade 3') {
                 toggle.checked = false;
@@ -762,7 +873,7 @@
             }
         }
 
-        function handleFormSubmit(event) {
+        async function handleFormSubmit(event) {
             event.preventDefault();
 
             const grade = document.getElementById('student-grade').value;
@@ -799,7 +910,8 @@
             handleGradeChange();
             toggleNumberFields();
 
-            showToast('Jersey request submitted successfully!', 'success');
+            await syncRecordToFirestore(newSubmission);
+            showToast('Jersey request submitted and saved successfully!', 'success');
         }
 
         function recalculateAssignments() {
@@ -880,6 +992,8 @@
         function renderTable() {
             const tbody = document.getElementById('sheet-table-body');
             const emptyState = document.getElementById('table-empty-state');
+            if (!tbody) return;
+
             const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
             const divFilter = document.getElementById('filter-division').value;
             const statusFilter = document.getElementById('filter-status').value;
@@ -966,7 +1080,7 @@
             updateStats();
         }
 
-        function togglePaidStatus(id) {
+        async function togglePaidStatus(id) {
             const sub = submissions.find(s => s.id === id);
             if (!sub) return;
 
@@ -977,6 +1091,7 @@
             recalculateAssignments();
             renderTable();
             renderSummary();
+            await syncRecordToFirestore(sub);
             showToast(`Updated payment status for ${sub.name}`, 'info');
         }
 
@@ -1002,6 +1117,7 @@
             const juniorList = document.getElementById('summary-junior-list');
             const seniorList = document.getElementById('summary-senior-list');
             const totalGrid = document.getElementById('summary-total-grid');
+            if (!primaryList) return;
 
             primaryList.innerHTML = '';
             juniorList.innerHTML = '';
@@ -1022,28 +1138,24 @@
                 const sCount = seniorSubs.filter(s => s.size === sz).length;
                 const totalCount = pCount + jCount + sCount;
 
-                // Primary row
                 primaryList.innerHTML += `
                     <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200">
                         <span class="font-bold text-slate-700">${sz}</span>
                         <span class="font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg">${pCount}</span>
                     </div>`;
 
-                // Junior row
                 juniorList.innerHTML += `
                     <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200">
                         <span class="font-bold text-slate-700">${sz}</span>
                         <span class="font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg">${jCount}</span>
                     </div>`;
 
-                // Senior row
                 seniorList.innerHTML += `
                     <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200">
                         <span class="font-bold text-slate-700">${sz}</span>
                         <span class="font-black text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg">${sCount}</span>
                     </div>`;
 
-                // Grand total card
                 totalGrid.innerHTML += `
                     <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl text-center">
                         <p class="text-xs font-bold text-slate-500 uppercase">${sz}</p>
@@ -1084,7 +1196,7 @@
             document.getElementById('modal-assigned-override').value = '';
         }
 
-        function saveModalEdit(e) {
+        async function saveModalEdit(e) {
             e.preventDefault();
             const id = document.getElementById('modal-student-id').value;
             const sub = submissions.find(s => s.id === id);
@@ -1118,7 +1230,9 @@
             renderTable();
             renderSummary();
             closeEditModal();
-            showToast('Student record updated!', 'success');
+            
+            await syncRecordToFirestore(sub);
+            showToast('Student record updated and saved!', 'success');
         }
 
         function openAddStudentModal() {
@@ -1146,7 +1260,7 @@
             openEditModal(newSub.id);
         }
 
-        function deleteSubmission(id) {
+        async function deleteSubmission(id) {
             const sub = submissions.find(s => s.id === id);
             if (!sub) return;
 
@@ -1154,6 +1268,7 @@
             recalculateAssignments();
             renderTable();
             renderSummary();
+            await deleteRecordFromFirestore(id);
             showToast(`Deleted request for ${sub.name}`, 'info');
         }
 
@@ -1295,6 +1410,7 @@
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
+            if (!container) return;
             const toast = document.createElement('div');
             
             let bg = 'bg-bvps-navy text-white border border-slate-700';
@@ -1349,14 +1465,31 @@
             return isStudent;
         }
 
+        window.switchTab = switchTab;
+        window.attemptAdminTab = attemptAdminTab;
+        window.toggleAdminAuth = toggleAdminAuth;
+        window.handleFormSubmit = handleFormSubmit;
+        window.handleGradeChange = handleGradeChange;
+        window.toggleNumberFields = toggleNumberFields;
+        window.copyStudentLink = copyStudentLink;
+        window.renderTable = renderTable;
+        window.openAddStudentModal = openAddStudentModal;
+        window.exportToCSV = exportToCSV;
+        window.verifyPin = verifyPin;
+        window.closePinModal = closePinModal;
+        window.saveModalEdit = saveModalEdit;
+        window.closeEditModal = closeEditModal;
+        window.clearOverrideNumber = clearOverrideNumber;
+        window.togglePaidStatus = togglePaidStatus;
+        window.openEditModal = openEditModal;
+        window.deleteSubmission = deleteSubmission;
+
         // Initialize on load
         window.onload = function() {
-            recalculateAssignments();
-            handleGradeChange();
-            
             checkStudentMode();
-            
+            handleGradeChange();
             switchTab('form');
+            initStorage();
         };
     </script>
 </body>
